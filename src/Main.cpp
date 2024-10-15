@@ -17,7 +17,6 @@ int main()
 
     std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
     std::string fontFilePath = "/Users/johnfry/TimberMac/timbermac/fonts/";
-
     int playerScore = 0;
 
     
@@ -39,8 +38,8 @@ int main()
 
     GameObject backGround = GameObject(textureBackground, 0, 0, false);
     backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
-    GameObject tree = GameObject(textureTree, resolution.x/2,0, true);
-
+    GameObject tree = GameObject(textureTree, resolution.x/2,resolution.y/2-80, true);
+    tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
 
     GameObject bee = GameObject(textureBee, 0, 0, true);
     bee.getSprite().scale(-1, 1);
