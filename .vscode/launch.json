@@ -10,7 +10,7 @@
             "program": "${workspaceFolder}/bin/Timber",
             "MIMode": "lldb",
             "targetArchitecture": "arm64",
-            "externalConsole": false
+            "externalConsole": true
         }
     ]
 }

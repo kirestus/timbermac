@@ -7,6 +7,8 @@ GameObject::GameObject(sf::Texture& _texture, float posX= 0, float posY= 0, bool
     this->mSprite = this->createSprite(_texture, posX, posY, _shouldCenterSprite);
     this->xPos = posX;
     this->yPos = posY;
+    this->mOrient = this->getOrient();
+    this->mIsFlopped = false;
 }
 
 sf::Sprite GameObject::createSprite(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite) {
@@ -26,7 +28,26 @@ sf::Vector2f GameObject::updatePos(float _x, float _y) {
     return sf::Vector2f(_x, _y);
 }
 
+void GameObject::move(sf::Vector2f _speed, float _dt){
+    if (this->getIsFlopped())
+    {
+        //if the sprite is flipped inverse the speed of the translation, this way forwards is always forwards
+        this->mSprite.move(_speed = sf::Vector2f(_speed.x *= -1,mSpeed.y));
+        return;
+    }
+    else{
+        sf::Vector2f vSpeed;
+        vSpeed.x = this->getSpeed().x; vSpeed.y = this->getSpeed().y;
+        this->mSprite.move(vSpeed.x * _dt,vSpeed.y * _dt);
+        }
+    return;
+     
+     }
+
 
 
 
 sf::Vector2f GameObject::getPos() { return this->getSprite().getPosition();}
+
+float GameObject::getOrient(){return this->getSprite().getRotation();}
+

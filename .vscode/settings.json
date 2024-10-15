@@ -3,6 +3,8 @@
         "SFML"
     ],
     "files.associations": {
-        "string": "cpp"
+        "string": "cpp",
+        "filesystem": "cpp",
+        "iostream": "cpp"
     }
 }
