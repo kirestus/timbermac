@@ -6,20 +6,43 @@
 #include <SFML/Audio.hpp>
 //using namespace sf;
 
+const sf::Vector2f resolution(1280,720);
+
+void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
+
+    sf::FloatRect _boundingRect = _textObj.getLocalBounds();
+    _textObj.setOrigin(_boundingRect.left+_boundingRect.width/2.0f,_boundingRect.top+_boundingRect.height/2.0f);
+    
+    if(_pos == resolution){_pos.x /= 2; _pos.y /= 2;}
+
+    _textObj.setPosition(_pos);
+    return;
+}
+
+void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::Vector2f())
+{   
+    if(_pos == sf::Vector2f())
+    {
+        //if vector is not assigned just assume they want to use the current position of the text object
+         _pos = _textObj.getPosition();
+    }
+    _textObj.setString(_textStr);
+    centerText(_textObj,_pos);
+}
+
 
 int main()
 {
-
-    sf::Vector2i resolution(1280,720);
-
 
     srand((int)time(0));
 
     std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
     std::string fontFilePath = "/Users/johnfry/TimberMac/timbermac/fonts/";
+    
     int playerScore = 0;
 
-    
+    const float gameLoopTime = 6;
+    float timeRemaining = gameLoopTime;
 
     sf::VideoMode vm(resolution.x, resolution.y);
     sf::RenderWindow window(vm, "Timber",sf::Style::Resize);
@@ -41,11 +64,10 @@ int main()
     GameObject tree = GameObject(textureTree, resolution.x/2,resolution.y/2-80, true);
     tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
 
-    GameObject bee = GameObject(textureBee, 0, 0, true);
-    bee.getSprite().scale(-1, 1);
-    bee.updatePos(300, 100);
-    bee.setSpeed(sf::Vector2f(40.0f, 2.0f));
-
+    GameObject bee = GameObject(textureBee, 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
+    bee.flopGO();
+    //bee.updatePos(300, 100);
+    bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
 
     GameObject cloud = GameObject(textureCloud, 400, 90, true);
     cloud.setSpeed(sf::Vector2f(0.1, 0));
@@ -67,6 +89,7 @@ int main()
     timeBar.setOutlineColor(sf::Color::White);
     timeBar.setOutlineThickness(4);
     timeBar.setPosition((resolution.x/2)-timeBarStartSize.x/2,(resolution.y)-timeBarStartSize.y-30);
+    float timeBarWidthPerSecond = timeBarStartSize.x / timeRemaining;
 
 
     sf::Text messageText;
@@ -88,17 +111,10 @@ int main()
 
     //position the text
 
-    sf::FloatRect scoreRect = scoreText.getLocalBounds();
-    scoreText.setOrigin(scoreRect.left+scoreRect.width/2.0f,scoreRect.top+scoreRect.height/2.0f);
-    scoreText.setPosition(100,30);
-
-
-    sf::FloatRect messageRect = messageText.getLocalBounds();
-    messageText.setOrigin(messageRect.left+messageRect.width/2.0f,messageRect.top+messageRect.height/2.0f);
-    messageText.setPosition(resolution.x/2,resolution.y/2);
+    centerText(scoreText,sf::Vector2f(100,30));
+    centerText(messageText);
 
     bool isBeeActive = false;
-
 
     /*///////////////////////////
     GameLoop
@@ -109,6 +125,18 @@ int main()
         window.clear();// clear the screen before drawing the next frame        
         int number = (rand() % 100);
         sf::Time dt = clockTime.restart(); //deltaTime
+
+
+        //set the timebar size
+        timeRemaining -= dt.asSeconds();
+        timeBar.setSize(sf::Vector2f(timeBarWidthPerSecond * timeRemaining, timeBarStartSize.y));
+        if (timeRemaining <= 0){paused = true;
+            updateText(messageText,"Out oF time");
+        }
+
+        //Reposition the text based on its new size
+        //centerText(messageText);
+
 
 
        /*********************************************************
@@ -132,7 +160,9 @@ int main()
                 case sf::Keyboard::Enter:
                 if (paused){paused=false;}
                 
-                else if (!paused){paused=true;}
+                else if (!paused){paused=true;
+                    updateText(messageText,"Paused...");
+                }
                     break;
                 
                 case sf::Keyboard::F:
@@ -163,7 +193,7 @@ int main()
        if (!isBeeActive)
        {
             bee.updatePos(-100, 100+number*3);
-            bee.setSpeed(sf::Vector2f(number/10+20, 2.0f));
+            bee.setSpeed(sf::Vector2f(number*-12,0));
 
             isBeeActive=true;
 
@@ -173,9 +203,9 @@ int main()
        }
 
 
-        cloud2.move(cloud2.getSpeed(),dt.asSeconds());
-        cloud.move(cloud.getSpeed(),dt.asSeconds());
-        bee.move(bee.getSpeed(),dt.asSeconds());
+        cloud2.move(cloud2.getSpeed(),dt);
+        cloud.move(cloud.getSpeed(),dt);
+        bee.move(bee.getSpeed(),dt);
     }
 
         
@@ -190,7 +220,11 @@ int main()
         tree.drawGO(window);
         bee.drawGO(window);
 
-        if(paused){window.draw(messageText);}
+        if(paused){window.draw(messageText);
+            playerScore = 0;
+            timeRemaining = 6;
+        
+        }
 
         window.draw(scoreText);
         window.draw(timeBar);
