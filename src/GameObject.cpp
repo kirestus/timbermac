@@ -2,6 +2,11 @@
 //#include <SFML/Graphics.hpp>
 
 
+GameObject::GameObject(){
+
+    
+}
+
 GameObject::GameObject(sf::Texture& _texture, float posX= 0, float posY= 0, bool _shouldCenterSprite=true) {
     
     this->mSprite = this->createSprite(_texture, posX, posY, _shouldCenterSprite, sf::Vector2f(1.0f,1.0f),0.0f);

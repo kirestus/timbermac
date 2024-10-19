@@ -1,13 +1,19 @@
 #pragma once
 #include "GameObject.h"
 #include <SFML/Graphics.hpp>
-/*
-class Cloud
+#include <string>
+
+class Cloud : public GameObject
 {
+    //const std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
+    public:  
+     
+     enum cloudType
+    {
+        eBigCloud,
+        eSmallCloud};
+    
+    Cloud(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id);
 
-    GameObject::Sprite cloud = createSprite(textureCloud, 0, 0, true);
-    float cloudSpeed = 0.01f;
-    cloud.setPosition(30, 90);
+        
 };
-
-*/

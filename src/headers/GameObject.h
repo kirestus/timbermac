@@ -20,6 +20,7 @@ private:
 
 public:
 
+    GameObject();
     GameObject(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite);
     GameObject(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, sf::Vector2f _scale, float _orient);  
     

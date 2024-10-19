@@ -2,11 +2,22 @@
 #include <string>
 #include <sstream>
 #include "headers/GameObject.h"
+#include "headers/Cloud.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 //using namespace sf;
 
 const sf::Vector2f resolution(1280,720);
+
+//declaring functions
+void updateBranches(int _seed);
+
+const int numberOfBranches = 6;
+GameObject branches[numberOfBranches];
+
+// what side is the player or branch on
+enum class side{LEFT,RIGHT,NONE};
+side branchPositions[numberOfBranches];
 
 void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
 
@@ -59,6 +70,9 @@ int main()
     sf::Texture textureCloud;
     textureCloud.loadFromFile(graphicsFilePath+"cloud.png");
 
+    sf::Texture textureBranch;
+    textureBranch.loadFromFile(graphicsFilePath+"branch.png");
+
     GameObject backGround = GameObject(textureBackground, 0, 0, false);
     backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
     GameObject tree = GameObject(textureTree, resolution.x/2,resolution.y/2-80, true);
@@ -66,16 +80,13 @@ int main()
 
     GameObject bee = GameObject(textureBee, 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
     bee.flopGO();
+
     //bee.updatePos(300, 100);
     bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
 
-    GameObject cloud = GameObject(textureCloud, 400, 90, true);
-    cloud.setSpeed(sf::Vector2f(0.1, 0));
-    cloud.getSprite().scale(1.4, 1.6);
-
-    GameObject cloud2 = GameObject(textureCloud, 200, 200, true);
-    sf::Vector2f cloudSpeed2(0.3, 0.0f);
-    cloud2.setSpeed(cloudSpeed2);
+    Cloud cloud = Cloud(textureCloud, 400, 200, true, cloud.eBigCloud); 
+    Cloud cloud2 = Cloud(textureCloud, 100,103, true, cloud.eSmallCloud);
+    Cloud cloud3 = Cloud(textureCloud, 760,245, true, cloud.eSmallCloud);
 
 
     sf::Clock clockTime;
@@ -115,6 +126,11 @@ int main()
     centerText(messageText);
 
     bool isBeeActive = false;
+
+
+    for(int i=0; i < numberOfBranches; i++){
+        branches[i].createSprite(textureBranch,-2000,-2000,true,sf::Vector2f(1,1),0.0f);}
+
 
     /*///////////////////////////
     GameLoop
@@ -205,6 +221,8 @@ int main()
 
         cloud2.move(cloud2.getSpeed(),dt);
         cloud.move(cloud.getSpeed(),dt);
+        cloud3.move(cloud3.getSpeed(),dt);
+
         bee.move(bee.getSpeed(),dt);
     }
 
@@ -215,8 +233,11 @@ int main()
         Draw The Scene
         *********************************************************/
         backGround.drawGO(window);
+
+        cloud3.drawGO(window);
         cloud2.drawGO(window);
         cloud.drawGO(window);
+        for(int i =0; i< numberOfBranches; i++){}
         tree.drawGO(window);
         bee.drawGO(window);
 
