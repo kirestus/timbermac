@@ -42,7 +42,7 @@ sf::Vector2f GameObject::updatePos(float _x, float _y) {
     this->xPos = _x;
     this->yPos = _y;
 
-    this->getSprite().setPosition(_x, _y);
+    this->mSprite.setPosition(_x, _y);
     return sf::Vector2f(_x, _y);
 }
 
@@ -66,7 +66,7 @@ void GameObject::move(sf::Vector2f _speed, sf::Time &_dt){
 
 
 
-sf::Vector2f GameObject::getPos() { return this->getSprite().getPosition();}
+const sf::Vector2f GameObject::getPos() { return this->getSprite().getPosition();}
 
-float GameObject::getOrient(){return this->getSprite().getRotation();}
+const float GameObject::getOrient(){return this->getSprite().getRotation();}
 

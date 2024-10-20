@@ -28,10 +28,10 @@ public:
     sf::Sprite& getSprite() { return this->mSprite;}
 
     
-    sf::Vector2f getPos();
-    float getOrient();
-    bool getIsFlopped(){return this->mIsFlopped;}
-    sf::Vector2f getSpeed() { return this-> mSpeed; }    
+    const sf::Vector2f getPos();
+    const float getOrient();
+    const bool getIsFlopped(){return this->mIsFlopped;}
+    const sf::Vector2f getSpeed() { return this-> mSpeed; }    
 
     sf::Vector2f updatePos(float _x,float _y);
     void setSpeed(sf::Vector2f _speed) { this->mSpeed = _speed; };
