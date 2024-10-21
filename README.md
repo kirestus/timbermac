@@ -1,6 +1,6 @@
 Timber!
 
-a simple game im working on from a textbook i bought teaching SFML c++ game development
+a simple game im working on from a textbook i bought teaching SFML c++ game programming
 
 this build is set up to work on my macbook it was a real pain in the dick getting it working, if you are having trouble setting up SFML on a macbook m2+ check out the link below for a really nice repo to clone
 
