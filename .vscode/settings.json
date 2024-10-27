@@ -5,6 +5,9 @@
     "files.associations": {
         "string": "cpp",
         "filesystem": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "vector": "cpp"
     }
 }

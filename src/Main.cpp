@@ -10,10 +10,13 @@
 const sf::Vector2f resolution(1280,720);
 
 //declaring functions
-void updateBranches(int _seed);
+void createBranches(sf::Texture &_texture);
+void renderBranches(sf::RenderWindow &_window, GameObject*);
 
 const int numberOfBranches = 6;
-GameObject branches[numberOfBranches];
+//GameObject branches[numberOfBranches]{ GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f), GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f), GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f), GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f), GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f), GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f)};
+//GameObject branches[];
+GameObject* branches = (GameObject*)malloc(sizeof(GameObject) * numberOfBranches);
 
 // what side is the player or branch on
 enum class side{LEFT,RIGHT,NONE};
@@ -42,6 +45,8 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 }
 
 
+
+
 int main()
 {
 
@@ -67,21 +72,20 @@ int main()
     sf::Texture textureTree;
     textureTree.loadFromFile(graphicsFilePath+"tree.png");
 
+    sf::Texture textureBranch;
+    textureBranch.loadFromFile(graphicsFilePath+"tree.png");
+
     sf::Texture textureCloud;
     textureCloud.loadFromFile(graphicsFilePath+"cloud.png");
 
-    sf::Texture textureBranch;
-    textureBranch.loadFromFile(graphicsFilePath+"branch.png");
-
     GameObject backGround = GameObject(textureBackground, 0, 0, false);
     backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
+
     GameObject tree = GameObject(textureTree, resolution.x/2,resolution.y/2-80, true);
     tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
 
     GameObject bee = GameObject(textureBee, 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
     bee.flopGO();
-
-    //bee.updatePos(300, 100);
     bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
 
     Cloud cloud = Cloud(textureCloud, 400, 200, true, cloud.eBigCloud); 
@@ -127,9 +131,7 @@ int main()
 
     bool isBeeActive = false;
 
-
-    for(int i=0; i < numberOfBranches; i++){
-        branches[i].createSprite(textureBranch,-2000,-2000,true,sf::Vector2f(1,1),0.0f);}
+    createBranches(textureBranch);
 
 
     /*///////////////////////////
@@ -147,7 +149,7 @@ int main()
         timeRemaining -= dt.asSeconds();
         timeBar.setSize(sf::Vector2f(timeBarWidthPerSecond * timeRemaining, timeBarStartSize.y));
         if (timeRemaining <= 0){paused = true;
-            updateText(messageText,"Out oF time");
+            updateText(messageText,"Out of Time");
         }
 
         //Reposition the text based on its new size
@@ -162,6 +164,7 @@ int main()
        
 
        sf::Event event; 
+       // need to chunk this out into its own class eventually so my code is so gummed up
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed){window.close();}
@@ -224,10 +227,10 @@ int main()
         cloud3.move(cloud3.getSpeed(),dt);
 
         bee.move(bee.getSpeed(),dt);
-    }
 
-        
-        
+
+    }// end if(!paused)
+
         
         /*********************************************************
         Draw The Scene
@@ -237,9 +240,14 @@ int main()
         cloud3.drawGO(window);
         cloud2.drawGO(window);
         cloud.drawGO(window);
-        for(int i =0; i< numberOfBranches; i++){}
+
         tree.drawGO(window);
         bee.drawGO(window);
+
+        //branches[1].drawGO(window);
+//this just crashes the game when i try and draw the branches this
+        renderBranches(window, branches);
+
 
         if(paused){window.draw(messageText);
             playerScore = 0;
@@ -260,5 +268,46 @@ int main()
         
 
     }
+
+    
 }
 
+void createBranches(sf::Texture &_texture){
+
+    //create branches (should chunk this out to a function)
+    for(int i=0; i < numberOfBranches; i++){
+        branches[i] = GameObject(_texture, 0,0, true, sf::Vector2f(1,1),0.0f);// create a GO for each branch
+        }
+
+    //update branches sprites
+
+    for (int i = 0; i < numberOfBranches; i++)
+    {
+        float height = i*150;
+
+
+        if (branchPositions[i] == side::LEFT)
+        {
+            branches[i].updatePos(610,height);
+            //branches[i].setFlopped();
+        }
+
+        else if (branchPositions[i] == side::RIGHT)
+        {
+            branches[i].updatePos(1330,height);
+        }
+
+        else
+        {
+            branches[i].updatePos(3000,height);
+        }
+    }
+}
+
+void renderBranches(sf::RenderWindow &_window, GameObject* _branches){
+    for (int i = 0; i < numberOfBranches; i++)
+    {
+        _branches[i].drawGO(_window);
+        std::cout<<"drew a branch to "<<_branches[i].getPos().x << _branches[i].getPos().y << " ";
+    }
+}
