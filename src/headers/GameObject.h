@@ -39,7 +39,7 @@ public:
     void move(sf::Vector2f _speed, sf::Time &_dt);
     void setFlopped(){this->mIsFlopped=true;}
 
-    void drawGO(sf::RenderWindow &_rw){ _rw.draw(this->mSprite);}
+    void drawGO(sf::RenderWindow &_rw);
 
     void flopGO(){this->getSprite().scale(-1, 1);this->mIsFlopped=true;}
 

@@ -12,7 +12,7 @@ GameObject::GameObject(){
 
 GameObject::GameObject(sf::Texture& _texture, float posX= 0, float posY= 0, bool _shouldCenterSprite=true) {
     
-    mSprite = createSprite(_texture, posX, posY, _shouldCenterSprite, sf::Vector2f(1.0f,1.0f),0.0f);
+    mSprite = this->createSprite(_texture, posX, posY, _shouldCenterSprite, sf::Vector2f(1.0f,1.0f),0.0f);
     xPos = posX;
     yPos = posY;
     mOrient = getOrient();
@@ -68,6 +68,15 @@ void GameObject::move(sf::Vector2f _speed, sf::Time &_dt){
 
 
 
+
+void GameObject::drawGO(sf::RenderWindow &_rw) {
+    if (mSprite.getTexture() == nullptr) {
+        std::cerr << "Error: Sprite texture is not set!" << std::endl;
+        return;
+    }
+
+    _rw.draw(mSprite);
+}
 
 const sf::Vector2f GameObject::getPos() { return this->getSprite().getPosition();}
 
