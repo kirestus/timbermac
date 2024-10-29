@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include <SFML/Graphics.hpp>
 #include <string>
-
+enum class side{LEFT,RIGHT,NONE};
 
 class Branch : public GameObject{
 // what side is the player or branch on
@@ -13,17 +13,14 @@ class Branch : public GameObject{
     
     public:
 
-        enum class side{LEFT,RIGHT,NONE};
-        side branchPositions[];
-
 
         Branch();
         Branch(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id); 
         
 
         void renderBranches(sf::RenderWindow &_window, Branch*);
-        void createBranches(int _itter);
-        void updateBranchPosition(int, int);
+        void createBranches(int _itter, side);
+        void updateBranchPosition(int _seed, side*);
 
 };
 

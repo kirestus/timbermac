@@ -8,8 +8,12 @@
 #include <SFML/Audio.hpp>
 //using namespace sf;
 
-const sf::Vector2f resolution(1280,720);
+
+
 const int numberOfBranches = 6;
+side branchPositions[numberOfBranches];
+
+const sf::Vector2f resolution(1280,720);
 Branch branches[numberOfBranches]; // initiate branches
 void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
 
@@ -122,10 +126,12 @@ int main()
     for (int i = 0; i < numberOfBranches; ++i) 
     {
         branches[i] = Branch(textureBranch, 0, 0, true, i);
-        branches[i].createBranches(i);
+        branches[i].createBranches(i,branchPositions[i]);
+        int r = (rand()%5);
+        branches[i].updateBranchPosition(r, branchPositions);
     }
 
-    std::cout<<branches->branchPositions;
+
 
 
     /*///////////////////////////
