@@ -10,6 +10,7 @@
 #include <SFML/Audio.hpp>
 
 
+
 const int numberOfBranches = 6;
 side eSideOfBranches[numberOfBranches];
 const sf::Vector2f resolution(1280,720);
@@ -129,13 +130,11 @@ int main()
     for (int i = 0; i < numberOfBranches; ++i) 
     {
         branches[i] = Branch(textureBranch, 0, 0, true, i);
-        branches[i].updateBranchPosition(i, numberOfBranches, eSideOfBranches);
+        branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,i);
     }
-    //branches->updateBranchPosition
-
-    //branches->resetBranches(branches,eSideOfBranches,numberOfBranches);
 
 
+    int buttonpresses =0;
     /*///////////////////////////
     GameLoop
     ///////////////////////////*/
@@ -146,6 +145,13 @@ int main()
         int number = (rand() % 100);
         sf::Time dt = clockTime.restart(); //deltaTime
 
+
+         if(playerCharacter.getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches))
+        {
+            if(playerCharacter.getPlayerSide()!= side::NONE)
+            {playerCharacter.dead();}
+            
+        }
 
         //set the timebar size
         timeRemaining -= dt.asSeconds();
@@ -175,28 +181,37 @@ int main()
                     break;
 
                 case sf::Keyboard::Enter:
-                if (paused){paused=false;}
+                if (paused){
+                    paused=false;
+                    branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches, number);
+                    playerScore =0;
+                    playerCharacter.alive();
+                    }
                 
                 else if (!paused){paused=true;
                     updateText(messageText,"Paused...");
+                    branches->resetBranches(branches,eSideOfBranches,numberOfBranches);
+
                 }
                     break;
                 
-                case sf::Keyboard::A:
+                case sf::Keyboard::A: case sf::Keyboard::Left:
                     if(!paused)
                     {
-                        if (playerCharacter.getPlayerSide() == side::RIGHT)
+
+                        if (playerCharacter.getPlayerSide() != side::LEFT)
                         {
                             playerCharacter.setPlayerSide(side::LEFT);
+                            ///if branch 6 side = playerside kill player
                             playerCharacter.sidePosition();
                         }
                     }
                     break;
 
-                case sf::Keyboard::D:
+                case sf::Keyboard::D: case sf::Keyboard::Right:
                     if(!paused)
                     {
-                        if (playerCharacter.getPlayerSide() == side::LEFT)
+                        if (playerCharacter.getPlayerSide() != side::RIGHT)
                         {
                             playerCharacter.setPlayerSide(side::RIGHT);
                             playerCharacter.sidePosition();
@@ -204,13 +219,14 @@ int main()
                     }
                     break;
 
-                case sf::Keyboard::P:
+                case sf::Keyboard::Space:
                     if(!paused)
                     {
                         if (playerCharacter.getIsDead()== false)
                         {
-                            playerCharacter.setIsDead(true);
-                            playerCharacter.dead();
+                            branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+buttonpresses);
+                            buttonpresses++;
+                            playerScore++;
                         }
                     }
                     break;
@@ -235,6 +251,8 @@ int main()
 
     if(!paused)
     {
+        //branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches);
+
         for (int i = 0; i < numberOfBranches; i++)
         {
             branches[i].moveBranch(branches, eSideOfBranches, i); 
@@ -281,7 +299,6 @@ int main()
 
         if(paused){
             window.draw(messageText);
-            playerScore = 0;
             timeRemaining = 6;
         }
 

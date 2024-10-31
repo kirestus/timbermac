@@ -78,6 +78,12 @@ void GameObject::drawGO(sf::RenderWindow &_rw) {
     _rw.draw(mSprite);
 }
 
+void GameObject::flopGO(){
+    if(getSprite().getScale().x > 0)
+    this->getSprite().scale(-1, 1);
+    this->mIsFlopped=true;
+    }
+
 const sf::Vector2f GameObject::getPos() { return this->getSprite().getPosition();}
 
 const float GameObject::getOrient(){return this->getSprite().getRotation();}

@@ -10,6 +10,8 @@ class Branch : public GameObject{
     private: 
         int mNumberOfBranches = 6;
         sf::Texture textureBranch;
+        side mBranchSide =side::NONE;
+
     
     public:
 
@@ -19,8 +21,12 @@ class Branch : public GameObject{
 
         void renderBranches(sf::RenderWindow &_window, Branch*, int _numberOfBranches);
         void moveBranch(Branch* _branch, side* _eBranchPos, int _index);
-        void updateBranchPosition(int _seed, int, side* _eBranchPos);
+        void updateBranchPosition(Branch* _branch, side* _eBranchPos, int _numberOfBranches, int _seed);
         void resetBranches(Branch* _branch, side* _eBranchPos, int _numberOfBranches);
+        
+        side getBranchSide(){return mBranchSide;}
+        void setBranchSide(side _side){mBranchSide = _side;}
 
+        side getLethalBranch(Branch* _branches, side* _side, int _numberOfBranches);
 };
 

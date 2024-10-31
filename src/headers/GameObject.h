@@ -41,7 +41,7 @@ public:
 
     void drawGO(sf::RenderWindow &_rw);
 
-    void flopGO(){this->getSprite().scale(-1, 1);this->mIsFlopped=true;}
+    void flopGO();
 
 
 

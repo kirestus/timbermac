@@ -22,6 +22,8 @@ public:
 
     void sidePosition();
     void dead();
+    void alive();
+
 
     side getPlayerSide(){return m_ePLayerSide;}
     void setPlayerSide(side _ePlayerSide){m_ePLayerSide =_ePlayerSide;}

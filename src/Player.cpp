@@ -20,13 +20,13 @@ void Player::sidePosition()
         if (getPlayerSide() == side::LEFT)
         {
             updatePos(450,500);
-            flopGO();
+            getSprite().setScale(sf::Vector2f(-1,1));
 
         }
         else if (getPlayerSide() == side::RIGHT)
         {
             updatePos(820,500);
-            flopGO();
+            getSprite().setScale(sf::Vector2f(1,1));
         }
         else 
             updatePos(3000,3000);
@@ -35,5 +35,11 @@ void Player::sidePosition()
 
 void Player::dead(){
     getSprite().setTexture(textureTombStone);
+    setIsDead(true);
+}
 
+void Player::alive(){
+    getSprite().setTexture(texturePlayer);
+    setIsDead(false);
+    setPlayerSide(side::LEFT);
 }

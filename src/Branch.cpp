@@ -24,24 +24,26 @@ void Branch::resetBranches(Branch* _branch, side* _eBranchPos, int _numberOfBran
 void Branch::moveBranch(Branch* _branch, side* _eBranchPos, int _index){
 //move the branches, this runs on update 
 
-    float height = _index*70+50;
+    float height = _index*100;
     //std::cout<<_branchPositions;
 
 
-    if (_eBranchPos[_index] == side::LEFT)
+    if (_eBranchPos[_index] == side::RIGHT)
     {
         this->updatePos(900,height);
-        //branches[i].setFlopped();
+            if (getSprite().getScale().x < 0 )
+            {
+                getSprite().setScale(sf::Vector2f(1,1));
+            }
     }
 
-    else if (_eBranchPos[_index] == side::RIGHT)
+    else if (_eBranchPos[_index] == side::LEFT)
     {
         this->updatePos(350,height);
-        if(this->getIsFlopped() == false)
-        {
-            this->flopGO();
-        }
-        
+            if (getSprite().getScale().x > 0 )
+            {
+                getSprite().setScale(sf::Vector2f(-1,1));
+            }
     }
 
     else
@@ -52,18 +54,16 @@ void Branch::moveBranch(Branch* _branch, side* _eBranchPos, int _index){
     
 }
 
-void Branch::updateBranchPosition(int _seed,int _numberOfBranches, side* _eBranchPos)
+void Branch::updateBranchPosition(Branch* _branches,side* _eBranchPos,int _numberOfBranches,int _seed)
 //this runs each time a branch is created or cut down,
 {
-        //side branchPos = branchPos
         for (int j = _numberOfBranches-1; j>0; j--)
         {
             _eBranchPos[j] = _eBranchPos[j-1];
-        }
-
-        srand((int)time(0)+_seed);
-        int r = (rand()%5);
-        
+        }  
+            srand((int)time(0)+_seed);
+            int r = (rand()%5);
+    
         switch(r) {
             case 0:
             _eBranchPos[0] =  side::LEFT;
@@ -76,11 +76,13 @@ void Branch::updateBranchPosition(int _seed,int _numberOfBranches, side* _eBranc
             default:
             _eBranchPos[0] = side::NONE;
             break;
-
-        }
-
+        }     
 }
 
+side Branch::getLethalBranch(Branch* _branches, side* _side, int _numberOfBranches)
+{
+    return _side[_numberOfBranches-1];
+}
 void Branch::renderBranches(sf::RenderWindow& _window, Branch* _branches, int _numberOfBranches){
     //render each branch
     for (int i = 0; i < _numberOfBranches; i++)
