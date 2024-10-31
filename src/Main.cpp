@@ -1,18 +1,17 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "headers/GlobalEnums.h"
 #include "headers/GameObject.h"
 #include "headers/Cloud.h"
 #include "headers/Branch.h"
+#include "headers/Player.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
-//using namespace sf;
-
 
 
 const int numberOfBranches = 6;
-side branchPositions[numberOfBranches];
-
+side eSideOfBranches[numberOfBranches];
 const sf::Vector2f resolution(1280,720);
 Branch branches[numberOfBranches]; // initiate branches
 void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
@@ -40,8 +39,6 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 
 int main()
 {
-    
-
     srand((int)time(0));
 
     std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
@@ -70,6 +67,9 @@ int main()
     sf::Texture textureBranch;
     textureBranch.loadFromFile(graphicsFilePath+"branch.png");
 
+    sf::Texture texturePlayer;
+    texturePlayer.loadFromFile(graphicsFilePath+"player.png");
+
     GameObject backGround = GameObject(textureBackground, 0, 0, false);
     backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
 
@@ -84,6 +84,7 @@ int main()
     Cloud cloud2 = Cloud(textureCloud, 100,103, true, cloud.eSmallCloud);
     Cloud cloud3 = Cloud(textureCloud, 760,245, true, cloud.eSmallCloud);
 
+    Player playerCharacter = Player(texturePlayer,0,0,true,0);
 
     sf::Clock clockTime;
     bool paused = true;
@@ -116,6 +117,8 @@ int main()
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);
 
+    playerCharacter.sidePosition();
+
     //position the text
 
     centerText(scoreText,sf::Vector2f(100,30));
@@ -126,12 +129,11 @@ int main()
     for (int i = 0; i < numberOfBranches; ++i) 
     {
         branches[i] = Branch(textureBranch, 0, 0, true, i);
-        branches[i].createBranches(i,branchPositions[i]);
-        int r = (rand()%5);
-        branches[i].updateBranchPosition(r, branchPositions);
+        branches[i].updateBranchPosition(i, numberOfBranches, eSideOfBranches);
     }
+    //branches->updateBranchPosition
 
-
+    //branches->resetBranches(branches,eSideOfBranches,numberOfBranches);
 
 
     /*///////////////////////////
@@ -151,7 +153,6 @@ int main()
         if (timeRemaining <= 0){paused = true;
             updateText(messageText,"Out of Time");
         }
-
 
 
        /*********************************************************
@@ -181,8 +182,37 @@ int main()
                 }
                     break;
                 
-                case sf::Keyboard::F:
-                //playerScore++;
+                case sf::Keyboard::A:
+                    if(!paused)
+                    {
+                        if (playerCharacter.getPlayerSide() == side::RIGHT)
+                        {
+                            playerCharacter.setPlayerSide(side::LEFT);
+                            playerCharacter.sidePosition();
+                        }
+                    }
+                    break;
+
+                case sf::Keyboard::D:
+                    if(!paused)
+                    {
+                        if (playerCharacter.getPlayerSide() == side::LEFT)
+                        {
+                            playerCharacter.setPlayerSide(side::RIGHT);
+                            playerCharacter.sidePosition();
+                        }
+                    }
+                    break;
+
+                case sf::Keyboard::P:
+                    if(!paused)
+                    {
+                        if (playerCharacter.getIsDead()== false)
+                        {
+                            playerCharacter.setIsDead(true);
+                            playerCharacter.dead();
+                        }
+                    }
                     break;
                 
                 default:
@@ -205,7 +235,11 @@ int main()
 
     if(!paused)
     {
-        
+        for (int i = 0; i < numberOfBranches; i++)
+        {
+            branches[i].moveBranch(branches, eSideOfBranches, i); 
+         }
+
        if (!isBeeActive)
        {
             bee.updatePos(-100, 100+number*3);
@@ -237,9 +271,11 @@ int main()
         cloud3.drawGO(window);
         cloud2.drawGO(window);
         cloud.drawGO(window);
-        branches->renderBranches(window,branches);
+        branches->renderBranches(window,branches,numberOfBranches);
         tree.drawGO(window);
         bee.drawGO(window);
+
+        playerCharacter.drawGO(window);
 
 
 
