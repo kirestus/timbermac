@@ -6,15 +6,20 @@
 #include "headers/Cloud.h"
 #include "headers/Branch.h"
 #include "headers/Player.h"
+#include "headers/preload.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
+preload loadGame;//runs a preload
+preload* getData = &loadGame;
 
+const sf::Vector2f resolution(1280,720);
 
 const int numberOfBranches = 6;
 side eSideOfBranches[numberOfBranches];
-const sf::Vector2f resolution(1280,720);
 Branch branches[numberOfBranches]; // initiate branches
+
+// i need to chunk this shit out into its own class, im sick of it gumming up my main
 void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
 
     sf::FloatRect _boundingRect = _textObj.getLocalBounds();
@@ -47,46 +52,13 @@ int main()
     
     int playerScore = 0;
 
-    const float gameLoopTime = 6;
+    const float gameLoopTime = 12;
     float timeRemaining = gameLoopTime;
 
     sf::VideoMode vm(resolution.x, resolution.y);
     sf::RenderWindow window(vm, "Timber",sf::Style::Resize);
 
-    sf::Texture textureBackground;
-    textureBackground.loadFromFile(graphicsFilePath+"background.png");
-
-    sf::Texture textureBee;
-    textureBee.loadFromFile(graphicsFilePath+"bee.png");
-
-    sf::Texture textureTree;
-    textureTree.loadFromFile(graphicsFilePath+"tree.png");
-
-    sf::Texture textureCloud;
-    textureCloud.loadFromFile(graphicsFilePath+"cloud.png");
-
-    sf::Texture textureBranch;
-    textureBranch.loadFromFile(graphicsFilePath+"branch.png");
-
-    sf::Texture texturePlayer;
-    texturePlayer.loadFromFile(graphicsFilePath+"player.png");
-
-    GameObject backGround = GameObject(textureBackground, 0, 0, false);
-    backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
-
-    GameObject tree = GameObject(textureTree, resolution.x/2,resolution.y/2-80, true);
-    tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
-
-    GameObject bee = GameObject(textureBee, 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
-    bee.flopGO();
-    bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
-
-    Cloud cloud = Cloud(textureCloud, 400, 200, true, cloud.eBigCloud); 
-    Cloud cloud2 = Cloud(textureCloud, 100,103, true, cloud.eSmallCloud);
-    Cloud cloud3 = Cloud(textureCloud, 760,245, true, cloud.eSmallCloud);
-
-    Player playerCharacter = Player(texturePlayer,0,0,true,0);
-
+    
     sf::Clock clockTime;
     bool paused = true;
 
@@ -118,6 +90,29 @@ int main()
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);
 
+
+    sf::Sound* pauseSound = &getData->getSFX(eSFX::PAUSE);
+    sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
+    sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
+
+
+    Player playerCharacter = getData->getPlayer();
+    GameObject backGround = GameObject(getData->getTexture(eTextureList::BACKGROUND), 0, 0, false);
+    GameObject tree = GameObject(getData->getTexture(eTextureList::TREE), resolution.x/2,resolution.y/2-80, true);
+    backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
+    tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
+    GameObject bee = GameObject(getData->getTexture(eTextureList::BEE), 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
+
+    bee.flopGO();
+    bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
+
+
+    Cloud cloud = Cloud(getData->getTexture(eTextureList::CLOUD), 400, 200, true, cloud.eBigCloud); 
+    Cloud cloud2 = Cloud(getData->getTexture(eTextureList::CLOUD), 100,103, true, cloud.eSmallCloud);
+    Cloud cloud3 = Cloud(getData->getTexture(eTextureList::CLOUD), 760,245, true, cloud.eSmallCloud);
+
+    
+
     playerCharacter.sidePosition();
 
     //position the text
@@ -129,7 +124,7 @@ int main()
 
     for (int i = 0; i < numberOfBranches; ++i) 
     {
-        branches[i] = Branch(textureBranch, 0, 0, true, i);
+        branches[i] = Branch(getData->getTexture(eTextureList::BRANCH), 0, 0, true, i);
         branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,i);
     }
 
@@ -145,14 +140,6 @@ int main()
         int number = (rand() % 100);
         sf::Time dt = clockTime.restart(); //deltaTime
 
-
-         if(playerCharacter.getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches))
-        {
-            if(playerCharacter.getPlayerSide()!= side::NONE)
-            {playerCharacter.dead();}
-            
-        }
-
         //set the timebar size
         timeRemaining -= dt.asSeconds();
         timeBar.setSize(sf::Vector2f(timeBarWidthPerSecond * timeRemaining, timeBarStartSize.y));
@@ -165,14 +152,25 @@ int main()
         Check For User Inputs
         *********************************************************/
 
-       
+       bool lockInput = false;
+
+
 
        sf::Event event; 
        // need to chunk this out into its own class eventually so my code is so gummed up
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)){
             if (event.type == sf::Event::Closed){window.close();}
 
+            if (event.type == sf::Event::KeyReleased){
+                switch (event.key.code)
+                {case sf::Keyboard::Space:
+                lockInput = false;
+                    break;
+                default:
+                    break;
+                }
+
+            }
             if (event.type == sf::Event::KeyPressed){
 
                 switch (event.key.code)
@@ -190,17 +188,15 @@ int main()
                 
                 else if (!paused){paused=true;
                     updateText(messageText,"Paused...");
+                    pauseSound->play();
                     branches->resetBranches(branches,eSideOfBranches,numberOfBranches);
 
                 }
                     break;
                 
                 case sf::Keyboard::A: case sf::Keyboard::Left:
-                    if(!paused)
-                    {
-
-                        if (playerCharacter.getPlayerSide() != side::LEFT)
-                        {
+                    if(!paused){
+                        if (playerCharacter.getPlayerSide() != side::LEFT){
                             playerCharacter.setPlayerSide(side::LEFT);
                             ///if branch 6 side = playerside kill player
                             playerCharacter.sidePosition();
@@ -209,10 +205,8 @@ int main()
                     break;
 
                 case sf::Keyboard::D: case sf::Keyboard::Right:
-                    if(!paused)
-                    {
-                        if (playerCharacter.getPlayerSide() != side::RIGHT)
-                        {
+                    if(!paused){
+                        if (playerCharacter.getPlayerSide() != side::RIGHT){
                             playerCharacter.setPlayerSide(side::RIGHT);
                             playerCharacter.sidePosition();
                         }
@@ -220,14 +214,21 @@ int main()
                     break;
 
                 case sf::Keyboard::Space:
-                    if(!paused)
-                    {
-                        if (playerCharacter.getIsDead()== false)
-                        {
+                    if(!paused){
+                        if (playerCharacter.getIsDead()== false && lockInput != true){
+                            if(playerCharacter.getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches)){
+                                if(playerCharacter.getPlayerSide()!= side::NONE)
+                                {playerCharacter.dead();
+                                    deathSound->play();
+                                    paused = true;        
+                                }  
+                            }
+                            chopSound->play();
                             branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+buttonpresses);
                             buttonpresses++;
                             playerScore++;
                         }
+                       lockInput = true;
                     }
                     break;
                 
@@ -239,6 +240,7 @@ int main()
             }
 
         } 
+
 
         /*********************************************************
         Update the Scene
@@ -252,24 +254,19 @@ int main()
     if(!paused)
     {
         //branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches);
-
-        for (int i = 0; i < numberOfBranches; i++)
-        {
+        pauseSound->pause();
+        for (int i = 0; i < numberOfBranches; i++){
             branches[i].moveBranch(branches, eSideOfBranches, i); 
          }
 
-       if (!isBeeActive)
-       {
+       if (!isBeeActive){
             bee.updatePos(-100, 100+number*3);
-            bee.setSpeed(sf::Vector2f(number*-12,0));
-
+            bee.setSpeed(sf::Vector2f(number*12%100*-1,0));
             isBeeActive=true;
-
        }
        if (bee.getPos().x>resolution.x+100){
         isBeeActive = false;
        }
-
 
         cloud2.move(cloud2.getSpeed(),dt);
         cloud.move(cloud.getSpeed(),dt);
@@ -277,10 +274,8 @@ int main()
 
         bee.move(bee.getSpeed(),dt);
 
-
     }// end if(!paused)
 
-        
         /*********************************************************
         Draw The Scene
         *********************************************************/
@@ -299,17 +294,19 @@ int main()
 
         if(paused){
             window.draw(messageText);
-            timeRemaining = 6;
+            timeRemaining = gameLoopTime;
         }
 
         window.draw(scoreText);
         window.draw(timeBar);
         window.display();
-        dt = clockTime.getElapsedTime();
-
-        // Track Time
-        
-
+        dt = clockTime.getElapsedTime();//keeps track of time
     }
 }
 
+
+void HandleInputEvents()
+{
+
+    
+}

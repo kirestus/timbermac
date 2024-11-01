@@ -24,7 +24,7 @@ void Branch::resetBranches(Branch* _branch, side* _eBranchPos, int _numberOfBran
 void Branch::moveBranch(Branch* _branch, side* _eBranchPos, int _index){
 //move the branches, this runs on update 
 
-    float height = _index*100;
+    float height = _index*120-120;
     //std::cout<<_branchPositions;
 
 
@@ -81,7 +81,7 @@ void Branch::updateBranchPosition(Branch* _branches,side* _eBranchPos,int _numbe
 
 side Branch::getLethalBranch(Branch* _branches, side* _side, int _numberOfBranches)
 {
-    return _side[_numberOfBranches-1];
+    return _side[_numberOfBranches-2];
 }
 void Branch::renderBranches(sf::RenderWindow& _window, Branch* _branches, int _numberOfBranches){
     //render each branch

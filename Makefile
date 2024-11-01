@@ -4,7 +4,12 @@ SFML_PATH = /opt/homebrew/Cellar/sfml/2.6.1
 # Replace "src" with the name of the folder where all your cpp code is
 cppFileNames := $(shell find ./src -type f -name "*.cpp")
 
+
+MACOSX_BUNDLE = True
+
 all: compile
+
+
 
 compile:	
 	mkdir -p bin
