@@ -1,5 +1,14 @@
 #pragma once
+#include <SFML/Graphics.hpp>
 
+
+namespace constants
+{
+    const int numberOfBranches = 6;
+    const sf::Vector2f resolution(1280,720);
+    const sf::Vector2f screenCenter(resolution.x/2,resolution.y/2);
+
+} // namespace constants
 
 enum class side{LEFT,RIGHT,NONE};
 

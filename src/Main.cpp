@@ -13,19 +13,30 @@
 preload loadGame;//runs a preload
 preload* getData = &loadGame;
 
-const sf::Vector2f resolution(1280,720);
+Player* playerCharacter = getData->getPlayerPtr();
+GameObject* backgroundGO = getData->getGO(eGO::BACKGROUND);
+GameObject* beeGO = getData->getGO(eGO::BEE);
+GameObject* treeGO = getData->getGO(eGO::TREE);
+GameObject* logGO= getData->getGO(eGO::LOG);
+side eSideOfBranches[constants::numberOfBranches];
+Branch branchesGO[constants::numberOfBranches]; // initiate branchesGO
+GameObject* axeGO = getData->getGO(eGO::AXE);
 
-const int numberOfBranches = 6;
-side eSideOfBranches[numberOfBranches];
-Branch branches[numberOfBranches]; // initiate branches
+sf::Sound* pauseSound = &getData->getSFX(eSFX::PAUSE);
+sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
+sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
+
+bool paused = true;
+bool queuePause = false;
+
 
 // i need to chunk this shit out into its own class, im sick of it gumming up my main
-void centerText(sf::Text &_textObj, sf::Vector2f _pos = resolution){
+void centerText(sf::Text &_textObj, sf::Vector2f _pos = constants::resolution){
 
     sf::FloatRect _boundingRect = _textObj.getLocalBounds();
     _textObj.setOrigin(_boundingRect.left+_boundingRect.width/2.0f,_boundingRect.top+_boundingRect.height/2.0f);
     
-    if(_pos == resolution){_pos.x /= 2; _pos.y /= 2;}
+    if(_pos == constants::resolution){_pos.x /= 2; _pos.y /= 2;}
 
     _textObj.setPosition(_pos);
     return;
@@ -43,18 +54,37 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 }
 
 
-void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt, side _playerSide){
-    if (!_logActive){
-        if(_playerSide == side::LEFT){_logGO->move(sf::Vector2f(3000.0,0),_dt);}
-        else{_logGO->move(sf::Vector2f(-3000.0,0),_dt);}
-        if(_logGO->getPos().x>3000 || _logGO->getPos().x<-3000){//if the log goes to far disable it
+void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt, side _playerSide,side _cachedPlayerSide){
+    if (_logActive){
+        float rotValue = _logGO->getOrient();
+        if(_cachedPlayerSide == side::LEFT){
+            _logGO->move(sf::Vector2f(5000.0,0),_dt);
+            _logGO->getSprite().rotate(rotValue+=10);
+        }
+        else{_logGO->move(sf::Vector2f(-5000.0,0),_dt);
+            _logGO->getSprite().rotate(rotValue+=10);
+            }
+        if(_logGO->getPos().x>2000 || _logGO->getPos().x<-2000){//if the log goes to far disable it
             _logActive = false;
         }
     }
 }
 
+void playerDeath()
+{
+    if(playerCharacter->getPlayerSide() == branchesGO->getLethalBranch(branchesGO,eSideOfBranches,constants::numberOfBranches)){
+        if(playerCharacter->getPlayerSide()!= side::NONE){
+            playerCharacter->dead();
+            deathSound->play();
+            queuePause = true;                               
+        }  
+    }
+}
+
+
 int main()
 {
+    //variables 
     srand((int)time(0));
     std::string fontFilePath = "/Users/johnfry/TimberMac/timbermac/fonts/";
     
@@ -62,13 +92,10 @@ int main()
     const float gameLoopTime = 12;
     float timeRemaining = gameLoopTime;
 
-    sf::VideoMode vm(resolution.x, resolution.y);
+    sf::VideoMode vm(constants::resolution.x, constants::resolution.y);
     sf::RenderWindow window(vm, "Timber",sf::Style::Resize);
-
     
     sf::Clock clockTime;
-    bool paused = true;
-    bool queuePause = false;
 
     //time bar
     sf::RectangleShape timeBar;
@@ -77,7 +104,7 @@ int main()
     timeBar.setFillColor(sf::Color::Red);
     timeBar.setOutlineColor(sf::Color::White);
     timeBar.setOutlineThickness(4);
-    timeBar.setPosition((resolution.x/2)-timeBarStartSize.x/2,(resolution.y)-timeBarStartSize.y-30);
+    timeBar.setPosition((constants::resolution.x/2)-timeBarStartSize.x/2,(constants::resolution.y)-timeBarStartSize.y-30);
     float timeBarWidthPerSecond = timeBarStartSize.x / timeRemaining;
 
     sf::Text messageText;
@@ -98,24 +125,17 @@ int main()
     messageText.setFillColor(sf::Color::White);
 
 
-    sf::Sound* pauseSound = &getData->getSFX(eSFX::PAUSE);
-    sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
-    sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
 
-    Player* playerCharacter = getData->getPlayerPtr();
-    GameObject* backGround = getData->getGO(eGO::BACKGROUND);
-    GameObject* beeGO = getData->getGO(eGO::BEE);
-    GameObject* treeGO = getData->getGO(eGO::TREE);
-    GameObject* logGO= getData->getGO(eGO::LOG);
-
-    backGround->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);//this is weak i should do this in the go class
-    treeGO->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
+//initiate all the gameobjects
+    backgroundGO->getSprite().scale(float(constants::resolution.x)/1920,float(constants::resolution.y)/1080);//this is weak i should do this in the go class
+    treeGO->getSprite().scale(float(constants::resolution.x)/1920,float(constants::resolution.y)/1080);
 
     beeGO->flopGO();
     beeGO->setSpeed(sf::Vector2f(-40.0f, 2.0f));
     bool isBeeActive = false;
 
     playerCharacter->sidePosition();
+    side cachedPlayerSide = playerCharacter->getPlayerSide();//set the players starting side and cache it
 
 
     //todo make these into an array and spawn them in random locations
@@ -127,16 +147,17 @@ int main()
     centerText(scoreText,sf::Vector2f(100,30));
     centerText(messageText);
 
-    for (int i = 0; i < numberOfBranches; ++i) 
+    for (int i = 0; i < constants::numberOfBranches; ++i) 
     {
-        branches[i] = Branch(getData->getTexture(eTextureList::BRANCH), 0, 0, true, i);
-        branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,i);
+        branchesGO[i] = Branch(getData->getTexture(eTextureList::BRANCH), 0, 0, true, i);
+        branchesGO->updateBranchPosition(branchesGO,eSideOfBranches,constants::numberOfBranches,i);
     }
 
+    bool logIsActive=false;
+    int numberOfUpdates = 0;//keeps track of the current frame number
     /*///////////////////////////
     GameLoop
     ///////////////////////////*/
-
     while (window.isOpen())
     {
         window.clear();// clear the screen before drawing the next frame        
@@ -149,6 +170,7 @@ int main()
         if (timeRemaining <= 0){paused = true;
             updateText(messageText,"Out of Time");
         }
+
 
        /*********************************************************
         Check For User Inputs
@@ -181,16 +203,16 @@ int main()
                 case sf::Keyboard::Enter:
                 if (paused){
                     paused=false;
-                    branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches, number);
+                    branchesGO->updateBranchPosition(branchesGO,eSideOfBranches,constants::numberOfBranches, number);
                     playerScore =0;
                     playerCharacter->alive();
+                    numberOfUpdates = 0;
                     }
                 
                 else if (!paused){paused=true;
                     updateText(messageText,"Paused...");
                     pauseSound->play();
-                    branches->resetBranches(branches,eSideOfBranches,numberOfBranches);
-
+                    branchesGO->resetBranches(branchesGO,eSideOfBranches,constants::numberOfBranches);
                 }
                     break;
                 
@@ -198,7 +220,6 @@ int main()
                     if(!paused){
                         if (playerCharacter->getPlayerSide() != side::LEFT){
                             playerCharacter->setPlayerSide(side::LEFT);
-                            ///if branch 6 side = playerside kill player
                             playerCharacter->sidePosition();
                         }
                     }
@@ -216,23 +237,15 @@ int main()
                 case sf::Keyboard::Space:
                     if(!paused){
                         if (playerCharacter->getIsDead()== false && lockInput != true){
-                        
-                            if(playerCharacter->getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches)){
-                                if(playerCharacter->getPlayerSide()!= side::NONE)//going a litte deep on the if statments here, should try and break it up a bit
-                                {playerCharacter->dead();
-                                    deathSound->play();
-                                    queuePause = true; 
-                                          
-                                }  
-                            }
-                            if (!queuePause)
-                            {branches->cutLowestBranch(branches,eSideOfBranches,numberOfBranches);}
-
-                            chopSound->play();
-                            moveLog(logGO,false,dt,playerCharacter->getPlayerSide());
-                            branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+playerScore);
-                            playerScore++;
-                            logGO->updatePos(500,400);
+                            playerDeath();
+                            if (!queuePause){
+                                playerCharacter->swingAxe(true, *axeGO);
+                                branchesGO->cutLowestBranch(branchesGO,eSideOfBranches,constants::numberOfBranches,logIsActive);}
+                                chopSound->play();
+                                cachedPlayerSide = playerCharacter->getPlayerSide();
+                                branchesGO->updateBranchPosition(branchesGO,eSideOfBranches,constants::numberOfBranches,number+playerScore);
+                                playerScore++;
+                                logGO->updatePos(constants::resolution.x/2,450);
                             
                         }
                        lockInput = true;
@@ -255,10 +268,9 @@ int main()
 
     if(!paused)
     {
-        //branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches);
         pauseSound->pause();
-        for (int i = 0; i < numberOfBranches; i++){
-            branches[i].moveBranch(branches, eSideOfBranches, i); 
+        for (int i = 0; i < constants::numberOfBranches; i++){
+            branchesGO[i].moveBranch(branchesGO, eSideOfBranches, i); 
          }
 
        if (!isBeeActive){
@@ -266,7 +278,7 @@ int main()
             beeGO->setSpeed(sf::Vector2f(number*12%100*-1,0));
             isBeeActive=true;
        }
-       if (beeGO->getPos().x>resolution.x+100){
+       if (beeGO->getPos().x>constants::resolution.x+100){
         isBeeActive = false;
        }
 
@@ -274,27 +286,26 @@ int main()
         cloud.move(cloud.getSpeed(),dt);
         cloud3.move(cloud3.getSpeed(),dt);
         beeGO->move(beeGO->getSpeed(),dt);
-        moveLog(logGO,false,dt,playerCharacter->getPlayerSide());
+        moveLog(logGO,logIsActive,dt,playerCharacter->getPlayerSide(),cachedPlayerSide);
+    numberOfUpdates ++;
 
     }// end if(!paused)
 
         /*********************************************************
         Draw The Scene
         *********************************************************/
-        backGround->drawGO(window);
+        backgroundGO->drawGO(window);
 
         cloud3.drawGO(window);
         cloud2.drawGO(window);
         cloud.drawGO(window);
-        branches->renderBranches(window,branches,numberOfBranches);
-        treeGO->drawGO(window);
-        beeGO->drawGO(window);
-        logGO->drawGO(window);
-        playerCharacter->drawGO(window);
         
-
-
-
+        if(numberOfUpdates>1){branchesGO->renderBranches(window,branchesGO,constants::numberOfBranches);}
+        treeGO->drawGO(window);
+        if(numberOfUpdates>1){beeGO->drawGO(window);}
+        if (!paused){logGO->drawGO(window);}
+        playerCharacter->drawGO(window);
+        axeGO->drawGO(window);
         if(paused){
             window.draw(messageText);
             timeRemaining = gameLoopTime;

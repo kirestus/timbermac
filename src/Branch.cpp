@@ -84,9 +84,10 @@ side Branch::getLethalBranch(Branch* _branches, side* _side, int _numberOfBranch
     return _side[_numberOfBranches-2];
 }
 
-void Branch::cutLowestBranch(Branch* _branches, side* _side, int _numberOfBranches)
+void Branch::cutLowestBranch(Branch* _branches, side* _side, int _numberOfBranches, bool& _isLogActive)
 {
     _side[_numberOfBranches-2] = side::NONE;
+    _isLogActive = true;
 }
 void Branch::renderBranches(sf::RenderWindow& _window, Branch* _branches, int _numberOfBranches){
     //render each branch

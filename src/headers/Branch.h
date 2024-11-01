@@ -8,7 +8,7 @@ class Branch : public GameObject{
 // what side is the player or branch on
 
     private: 
-        int mNumberOfBranches = 6;
+        const int* mNumberOfBranches = &constants::numberOfBranches;
         sf::Texture textureBranch;
         side mBranchSide =side::NONE;
 
@@ -29,7 +29,7 @@ class Branch : public GameObject{
 
         side getLethalBranch(Branch* _branches, side* _side, int _numberOfBranches);
 
-        void cutLowestBranch(Branch* _branches, side* _side, int _numberOfBranches);
+        void cutLowestBranch(Branch* _branches, side* _side, int _numberOfBranches, bool& _isLogActive);
 
 
         

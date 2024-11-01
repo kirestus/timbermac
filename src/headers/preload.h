@@ -7,7 +7,6 @@
 #include "SFML/Audio.hpp"
 #include "GlobalEnums.h"
 
-
 class preload{//Preload all the assets so they dont make the main loop super ugly
 private:
 
@@ -23,6 +22,7 @@ sf::Texture textureTree;
 sf::Texture textureBranch;
 sf::Texture texturePlayer;
 sf::Texture textureLog;
+sf::Texture textureAxe;
 
 sf::SoundBuffer deathBuffer;
 sf::Sound death;
@@ -40,12 +40,14 @@ GameObject backGround;
 GameObject tree;
 GameObject bee;
 GameObject log;
+GameObject axe;
 
 public:
 preload();
 Player* getPlayerPtr(){return &playerCharacter;}
 GameObject getBee(){return bee;} 
 GameObject getTree(){return tree;}
+
 
 
 GameObject* getGO(eGO _go)
@@ -64,6 +66,7 @@ GameObject* getGO(eGO _go)
             break;
 
         case eGO::AXE:
+            return &axe;
             break;
 
         case eGO::LOG:
@@ -105,7 +108,9 @@ sf::Texture& getTexture(eTextureList _texture)//todo make this an enum
     case eTextureList::LOG:
         textureLog.loadFromFile(graphicsFilePath+"log.png");
         return textureLog;
-
+    case eTextureList::AXE:
+        textureAxe.loadFromFile(graphicsFilePath+"axe.png");
+        return textureAxe;
 
     default:
         break;

@@ -24,6 +24,7 @@ public:
     void dead();
     void alive();
 
+    void swingAxe(bool _shouldSwing, GameObject& _axe);
 
     side getPlayerSide(){return m_ePLayerSide;}
     void setPlayerSide(side _ePlayerSide){m_ePLayerSide =_ePlayerSide;}
