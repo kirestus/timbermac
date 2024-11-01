@@ -8,7 +8,7 @@
 #include "GlobalEnums.h"
 
 
-class preload{
+class preload{//Preload all the assets so they dont make the main loop super ugly
 private:
 
 std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
@@ -41,10 +41,33 @@ GameObject bee;
 
 public:
 preload();
-Player getPlayer(){return playerCharacter;}
-GameObject* getBackground(){return &backGround;}
+Player* getPlayerPtr(){return &playerCharacter;}
 GameObject getBee(){return bee;} 
 GameObject getTree(){return tree;}
+
+
+GameObject* getGO(eGO _go)
+{
+    switch (_go){
+        case eGO::BACKGROUND:
+            return &backGround;
+            break;
+
+        case eGO::BEE:
+            return &bee;
+            break;
+
+        case eGO::TREE:
+            return &tree;
+            break;
+
+        case eGO::AXE:
+            break;
+
+    }
+    return &tree;
+}
+
 
 sf::Texture& getTexture(eTextureList _texture)//todo make this an enum
 {
@@ -60,14 +83,20 @@ sf::Texture& getTexture(eTextureList _texture)//todo make this an enum
         return textureBranch;
         break;
     case eTextureList::PLAYER:
+        texturePlayer.loadFromFile(graphicsFilePath+"player.png");
         return texturePlayer;
         break;
     case eTextureList::BEE:
+        textureBee.loadFromFile(graphicsFilePath+"bee.png");
         return textureBee;
         break;
     case eTextureList::TREE:
         textureTree.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/tree.png");
         return textureTree;
+    case eTextureList::BACKGROUND:
+        textureBackground.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/background.png");
+        return textureBackground;
+
 
     default:
         break;
@@ -102,7 +131,7 @@ sf::Sound& getSFX(eSFX _sfx)
         default:
             break;
     }
-return chop;
+return chop; // return a sound regardless
 }
 
 };

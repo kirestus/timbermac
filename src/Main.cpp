@@ -46,12 +46,9 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 int main()
 {
     srand((int)time(0));
-
-    std::string graphicsFilePath = "/Users/johnfry/TimberMac/timbermac/graphics/";// i hate having to do this
     std::string fontFilePath = "/Users/johnfry/TimberMac/timbermac/fonts/";
     
     int playerScore = 0;
-
     const float gameLoopTime = 12;
     float timeRemaining = gameLoopTime;
 
@@ -61,6 +58,7 @@ int main()
     
     sf::Clock clockTime;
     bool paused = true;
+    bool queuePause = false;
 
     //time bar
     sf::RectangleShape timeBar;
@@ -71,7 +69,6 @@ int main()
     timeBar.setOutlineThickness(4);
     timeBar.setPosition((resolution.x/2)-timeBarStartSize.x/2,(resolution.y)-timeBarStartSize.y-30);
     float timeBarWidthPerSecond = timeBarStartSize.x / timeRemaining;
-
 
     sf::Text messageText;
     sf::Text scoreText;
@@ -95,32 +92,29 @@ int main()
     sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
     sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
 
+    Player* playerCharacter = getData->getPlayerPtr();
+    GameObject* backGround = getData->getGO(eGO::BACKGROUND);
+    GameObject* beeGO = getData->getGO(eGO::BEE);
+    GameObject* treeGO = getData->getGO(eGO::TREE);
 
-    Player playerCharacter = getData->getPlayer();
-    GameObject backGround = GameObject(getData->getTexture(eTextureList::BACKGROUND), 0, 0, false);
-    GameObject tree = GameObject(getData->getTexture(eTextureList::TREE), resolution.x/2,resolution.y/2-80, true);
-    backGround.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
-    tree.getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
-    GameObject bee = GameObject(getData->getTexture(eTextureList::BEE), 0, 0, true,sf::Vector2f(0.6f,0.6f),0.0f);
+    backGround->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);//this is weak i should do this in the go class
+    treeGO->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
 
-    bee.flopGO();
-    bee.setSpeed(sf::Vector2f(-40.0f, 2.0f));
+    beeGO->flopGO();
+    beeGO->setSpeed(sf::Vector2f(-40.0f, 2.0f));
+    bool isBeeActive = false;
+
+    playerCharacter->sidePosition();
 
 
+    //todo make these into an array and spawn them in random locations
     Cloud cloud = Cloud(getData->getTexture(eTextureList::CLOUD), 400, 200, true, cloud.eBigCloud); 
     Cloud cloud2 = Cloud(getData->getTexture(eTextureList::CLOUD), 100,103, true, cloud.eSmallCloud);
     Cloud cloud3 = Cloud(getData->getTexture(eTextureList::CLOUD), 760,245, true, cloud.eSmallCloud);
 
-    
-
-    playerCharacter.sidePosition();
-
     //position the text
-
     centerText(scoreText,sf::Vector2f(100,30));
     centerText(messageText);
-
-    bool isBeeActive = false;
 
     for (int i = 0; i < numberOfBranches; ++i) 
     {
@@ -128,8 +122,6 @@ int main()
         branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,i);
     }
 
-
-    int buttonpresses =0;
     /*///////////////////////////
     GameLoop
     ///////////////////////////*/
@@ -147,14 +139,11 @@ int main()
             updateText(messageText,"Out of Time");
         }
 
-
        /*********************************************************
         Check For User Inputs
         *********************************************************/
 
        bool lockInput = false;
-
-
 
        sf::Event event; 
        // need to chunk this out into its own class eventually so my code is so gummed up
@@ -183,7 +172,7 @@ int main()
                     paused=false;
                     branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches, number);
                     playerScore =0;
-                    playerCharacter.alive();
+                    playerCharacter->alive();
                     }
                 
                 else if (!paused){paused=true;
@@ -196,36 +185,35 @@ int main()
                 
                 case sf::Keyboard::A: case sf::Keyboard::Left:
                     if(!paused){
-                        if (playerCharacter.getPlayerSide() != side::LEFT){
-                            playerCharacter.setPlayerSide(side::LEFT);
+                        if (playerCharacter->getPlayerSide() != side::LEFT){
+                            playerCharacter->setPlayerSide(side::LEFT);
                             ///if branch 6 side = playerside kill player
-                            playerCharacter.sidePosition();
+                            playerCharacter->sidePosition();
                         }
                     }
                     break;
 
                 case sf::Keyboard::D: case sf::Keyboard::Right:
                     if(!paused){
-                        if (playerCharacter.getPlayerSide() != side::RIGHT){
-                            playerCharacter.setPlayerSide(side::RIGHT);
-                            playerCharacter.sidePosition();
+                        if (playerCharacter->getPlayerSide() != side::RIGHT){
+                            playerCharacter->setPlayerSide(side::RIGHT);
+                            playerCharacter->sidePosition();
                         }
                     }
                     break;
 
                 case sf::Keyboard::Space:
                     if(!paused){
-                        if (playerCharacter.getIsDead()== false && lockInput != true){
-                            if(playerCharacter.getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches)){
-                                if(playerCharacter.getPlayerSide()!= side::NONE)
-                                {playerCharacter.dead();
+                        if (playerCharacter->getIsDead()== false && lockInput != true){
+                            if(playerCharacter->getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches)){
+                                if(playerCharacter->getPlayerSide()!= side::NONE)//going a litte deep on the if statments here, should try and break it up a bit
+                                {playerCharacter->dead();
                                     deathSound->play();
-                                    paused = true;        
+                                    queuePause = true;       
                                 }  
                             }
                             chopSound->play();
-                            branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+buttonpresses);
-                            buttonpresses++;
+                            branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+playerScore);
                             playerScore++;
                         }
                        lockInput = true;
@@ -235,12 +223,8 @@ int main()
                 default:
                     break;
                 }
-
-
             }
-
         } 
-
 
         /*********************************************************
         Update the Scene
@@ -249,7 +233,6 @@ int main()
         std::stringstream ss;
         ss << "Score = " << playerScore;
         scoreText.setString(ss.str());
-
 
     if(!paused)
     {
@@ -260,35 +243,33 @@ int main()
          }
 
        if (!isBeeActive){
-            bee.updatePos(-100, 100+number*3);
-            bee.setSpeed(sf::Vector2f(number*12%100*-1,0));
+            beeGO->updatePos(-100, 100+number*3);
+            beeGO->setSpeed(sf::Vector2f(number*12%100*-1,0));
             isBeeActive=true;
        }
-       if (bee.getPos().x>resolution.x+100){
+       if (beeGO->getPos().x>resolution.x+100){
         isBeeActive = false;
        }
 
         cloud2.move(cloud2.getSpeed(),dt);
         cloud.move(cloud.getSpeed(),dt);
         cloud3.move(cloud3.getSpeed(),dt);
-
-        bee.move(bee.getSpeed(),dt);
+        beeGO->move(beeGO->getSpeed(),dt);
 
     }// end if(!paused)
 
         /*********************************************************
         Draw The Scene
         *********************************************************/
-        backGround.drawGO(window);
+        backGround->drawGO(window);
 
         cloud3.drawGO(window);
         cloud2.drawGO(window);
         cloud.drawGO(window);
         branches->renderBranches(window,branches,numberOfBranches);
-        tree.drawGO(window);
-        bee.drawGO(window);
-
-        playerCharacter.drawGO(window);
+        treeGO->drawGO(window);
+        beeGO->drawGO(window);
+        playerCharacter->drawGO(window);
 
 
 
@@ -301,12 +282,11 @@ int main()
         window.draw(timeBar);
         window.display();
         dt = clockTime.getElapsedTime();//keeps track of time
+
+        if (queuePause){//this is just to let the game update the render before pausing so that you can see the player get skewered
+                paused=true;
+                queuePause=false;
+            }
     }
 }
 
-
-void HandleInputEvents()
-{
-
-    
-}
