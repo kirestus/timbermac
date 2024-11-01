@@ -28,5 +28,10 @@ class Branch : public GameObject{
         void setBranchSide(side _side){mBranchSide = _side;}
 
         side getLethalBranch(Branch* _branches, side* _side, int _numberOfBranches);
+
+        void cutLowestBranch(Branch* _branches, side* _side, int _numberOfBranches);
+
+
+        
 };
 

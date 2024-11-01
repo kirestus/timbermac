@@ -22,6 +22,7 @@ sf::Texture textureBee;
 sf::Texture textureTree;
 sf::Texture textureBranch;
 sf::Texture texturePlayer;
+sf::Texture textureLog;
 
 sf::SoundBuffer deathBuffer;
 sf::Sound death;
@@ -38,6 +39,7 @@ Player playerCharacter;
 GameObject backGround;
 GameObject tree;
 GameObject bee;
+GameObject log;
 
 public:
 preload();
@@ -62,6 +64,10 @@ GameObject* getGO(eGO _go)
             break;
 
         case eGO::AXE:
+            break;
+
+        case eGO::LOG:
+            return &log;
             break;
 
     }
@@ -96,6 +102,9 @@ sf::Texture& getTexture(eTextureList _texture)//todo make this an enum
     case eTextureList::BACKGROUND:
         textureBackground.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/background.png");
         return textureBackground;
+    case eTextureList::LOG:
+        textureLog.loadFromFile(graphicsFilePath+"log.png");
+        return textureLog;
 
 
     default:

@@ -43,6 +43,15 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 }
 
 
+void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt){
+    if (!_logActive){
+        _logGO->move(sf::Vector2f(3000.0,0),_dt);
+        if(_logGO->getPos().x>3000 || _logGO->getPos().x<-3000){//if the log goes to far disable it
+            _logActive = false;
+        }
+    }
+}
+
 int main()
 {
     srand((int)time(0));
@@ -96,6 +105,7 @@ int main()
     GameObject* backGround = getData->getGO(eGO::BACKGROUND);
     GameObject* beeGO = getData->getGO(eGO::BEE);
     GameObject* treeGO = getData->getGO(eGO::TREE);
+    GameObject* logGO= getData->getGO(eGO::LOG);
 
     backGround->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);//this is weak i should do this in the go class
     treeGO->getSprite().scale(float(resolution.x)/1920,float(resolution.y)/1080);
@@ -205,16 +215,24 @@ int main()
                 case sf::Keyboard::Space:
                     if(!paused){
                         if (playerCharacter->getIsDead()== false && lockInput != true){
+                        
                             if(playerCharacter->getPlayerSide() == branches->getLethalBranch(branches,eSideOfBranches,numberOfBranches)){
                                 if(playerCharacter->getPlayerSide()!= side::NONE)//going a litte deep on the if statments here, should try and break it up a bit
                                 {playerCharacter->dead();
                                     deathSound->play();
-                                    queuePause = true;       
+                                    queuePause = true; 
+                                          
                                 }  
                             }
+                            if (!queuePause)
+                            {branches->cutLowestBranch(branches,eSideOfBranches,numberOfBranches);}
+
                             chopSound->play();
+                            moveLog(logGO,false,dt);
                             branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+playerScore);
                             playerScore++;
+                            logGO->updatePos(500,400);
+                            
                         }
                        lockInput = true;
                     }
@@ -255,6 +273,7 @@ int main()
         cloud.move(cloud.getSpeed(),dt);
         cloud3.move(cloud3.getSpeed(),dt);
         beeGO->move(beeGO->getSpeed(),dt);
+        moveLog(logGO,false,dt);
 
     }// end if(!paused)
 
@@ -269,7 +288,9 @@ int main()
         branches->renderBranches(window,branches,numberOfBranches);
         treeGO->drawGO(window);
         beeGO->drawGO(window);
+        logGO->drawGO(window);
         playerCharacter->drawGO(window);
+        
 
 
 
@@ -277,7 +298,7 @@ int main()
             window.draw(messageText);
             timeRemaining = gameLoopTime;
         }
-
+        //draw hud elements last
         window.draw(scoreText);
         window.draw(timeBar);
         window.display();
