@@ -124,7 +124,7 @@ int main()
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);
 
-
+    int cacheUpdate;
 
 //initiate all the gameobjects
     backgroundGO->getSprite().scale(float(constants::resolution.x)/1920,float(constants::resolution.y)/1080);//this is weak i should do this in the go class
@@ -177,7 +177,7 @@ int main()
         *********************************************************/
 
        bool lockInput = false;
-
+    
        sf::Event event; 
        // need to chunk this out into its own class eventually so my code is so gummed up
         while (window.pollEvent(event)){
@@ -240,13 +240,13 @@ int main()
                             playerDeath();
                             if (!queuePause){
                                 playerCharacter->swingAxe(true, *axeGO);
+                                cacheUpdate = numberOfUpdates;
                                 branchesGO->cutLowestBranch(branchesGO,eSideOfBranches,constants::numberOfBranches,logIsActive);}
                                 chopSound->play();
                                 cachedPlayerSide = playerCharacter->getPlayerSide();
                                 branchesGO->updateBranchPosition(branchesGO,eSideOfBranches,constants::numberOfBranches,number+playerScore);
                                 playerScore++;
                                 logGO->updatePos(constants::resolution.x/2,450);
-                            
                         }
                        lockInput = true;
                     }
@@ -279,7 +279,7 @@ int main()
             isBeeActive=true;
        }
        if (beeGO->getPos().x>constants::resolution.x+100){
-        isBeeActive = false;
+            isBeeActive = false;
        }
 
         cloud2.move(cloud2.getSpeed(),dt);
@@ -287,7 +287,7 @@ int main()
         cloud3.move(cloud3.getSpeed(),dt);
         beeGO->move(beeGO->getSpeed(),dt);
         moveLog(logGO,logIsActive,dt,playerCharacter->getPlayerSide(),cachedPlayerSide);
-    numberOfUpdates ++;
+        numberOfUpdates ++; 
 
     }// end if(!paused)
 
@@ -305,7 +305,7 @@ int main()
         if(numberOfUpdates>1){beeGO->drawGO(window);}
         if (!paused){logGO->drawGO(window);}
         playerCharacter->drawGO(window);
-        axeGO->drawGO(window);
+        if(numberOfUpdates<cacheUpdate+130){axeGO->drawGO(window);}//axe hit only lasts a moment
         if(paused){
             window.draw(messageText);
             timeRemaining = gameLoopTime;
