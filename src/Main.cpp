@@ -43,9 +43,10 @@ void updateText(sf::Text &_textObj, std::string _textStr,sf::Vector2f _pos=sf::V
 }
 
 
-void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt){
+void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt, side _playerSide){
     if (!_logActive){
-        _logGO->move(sf::Vector2f(3000.0,0),_dt);
+        if(_playerSide == side::LEFT){_logGO->move(sf::Vector2f(3000.0,0),_dt);}
+        else{_logGO->move(sf::Vector2f(-3000.0,0),_dt);}
         if(_logGO->getPos().x>3000 || _logGO->getPos().x<-3000){//if the log goes to far disable it
             _logActive = false;
         }
@@ -228,7 +229,7 @@ int main()
                             {branches->cutLowestBranch(branches,eSideOfBranches,numberOfBranches);}
 
                             chopSound->play();
-                            moveLog(logGO,false,dt);
+                            moveLog(logGO,false,dt,playerCharacter->getPlayerSide());
                             branches->updateBranchPosition(branches,eSideOfBranches,numberOfBranches,number+playerScore);
                             playerScore++;
                             logGO->updatePos(500,400);
@@ -273,7 +274,7 @@ int main()
         cloud.move(cloud.getSpeed(),dt);
         cloud3.move(cloud3.getSpeed(),dt);
         beeGO->move(beeGO->getSpeed(),dt);
-        moveLog(logGO,false,dt);
+        moveLog(logGO,false,dt,playerCharacter->getPlayerSide());
 
     }// end if(!paused)
 
