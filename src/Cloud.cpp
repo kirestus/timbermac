@@ -5,7 +5,7 @@ Cloud::Cloud(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSp
 
 
     sf::Texture textureCloud;
-    textureCloud.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/cloud.png");
+    textureCloud.loadFromFile("../graphics/cloud.png");
 
     if (_id == eBigCloud)
         {setSpeed(sf::Vector2f(1, 0.0));

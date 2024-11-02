@@ -86,7 +86,7 @@ int main()
 {
     //variables 
     srand((int)time(0));
-    std::string fontFilePath = "/Users/johnfry/TimberMac/timbermac/fonts/";
+    std::string fontFilePath = "../fonts/";
     
     int playerScore = 0;
     const float gameLoopTime = 12;
@@ -96,6 +96,8 @@ int main()
     sf::RenderWindow window(vm, "Timber",sf::Style::Resize);
     
     sf::Clock clockTime;
+    int cacheUpdate;
+
 
     //time bar
     sf::RectangleShape timeBar;
@@ -124,7 +126,6 @@ int main()
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);
 
-    int cacheUpdate;
 
 //initiate all the gameobjects
     backgroundGO->getSprite().scale(float(constants::resolution.x)/1920,float(constants::resolution.y)/1080);//this is weak i should do this in the go class
