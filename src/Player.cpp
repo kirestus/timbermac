@@ -1,12 +1,11 @@
 #include "headers/Player.h"
 
 Player::Player(){
-texturePlayer.loadFromFile("../graphics/player.png");  
-textureTombStone.loadFromFile("../graphics/rip.png");
 }
 
 Player::Player(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id)
 : GameObject(_texture, posX, posY, _shouldCenterSprite=true, sf::Vector2f(1.0f,1.0f), 0.0f){
+    getSprite().setTexture(_texture);
 }
 
 
@@ -32,14 +31,14 @@ void Player::sidePosition()
     }
 }
 
-void Player::dead(){
-    getSprite().setTexture(textureTombStone);
+void Player::dead(sf::Texture& _tombstoneTexture){
+    getSprite().setTexture(_tombstoneTexture);
     updatePos(getPos().x,getPos().y+50);
     setIsDead(true);
 }
 
-void Player::alive(){
-    getSprite().setTexture(texturePlayer);
+void Player::alive(sf::Texture& _playerTexture){
+    getSprite().setTexture(_playerTexture);
     setPlayerSide(side::LEFT);
     getSprite().setScale(sf::Vector2f(-1,1));
     setIsDead(false);

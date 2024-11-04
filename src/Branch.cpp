@@ -1,14 +1,12 @@
 #include "headers/Branch.h"
 
 Branch::Branch():GameObject(){
-    //create an empty branch
-    textureBranch.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/branch.png");  
+    //create an empty branch 
 
 }
 
 Branch::Branch(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id) 
 : GameObject(_texture, posX, posY, _shouldCenterSprite=true, sf::Vector2f(1.0f,1.0f), 0.0f){
-    textureBranch.loadFromFile("/Users/johnfry/TimberMac/timbermac/graphics/branch.png");  
     
 }
 
@@ -24,7 +22,7 @@ void Branch::resetBranches(Branch* _branch, side* _eBranchPos, int _numberOfBran
 void Branch::moveBranch(Branch* _branch, side* _eBranchPos, int _index){
 //move the branches, this runs on update 
 
-    float height = _index*120-120;
+    float height = _index*120.0-120.0;
     //std::cout<<_branchPositions;
 
 

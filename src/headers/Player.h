@@ -8,11 +8,8 @@ class Player : public GameObject{
 
 private:
     side m_ePLayerSide = side::LEFT;
-
     bool mIsDead=false;
 
-    sf::Texture texturePlayer;
-    sf::Texture textureTombStone;
 
 
 public:
@@ -21,8 +18,8 @@ public:
     Player(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id); 
 
     void sidePosition();
-    void dead();
-    void alive();
+    void dead(sf::Texture& _tombStoneTexture);
+    void alive(sf::Texture& _playerTexture);
 
     void swingAxe(bool _shouldSwing, GameObject& _axe);
 

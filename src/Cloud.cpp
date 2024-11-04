@@ -4,8 +4,6 @@
 Cloud::Cloud(sf::Texture& _texture, float posX, float posY, bool _shouldCenterSprite, int _id) : GameObject(_texture, posX, posY, _shouldCenterSprite){
 
 
-    sf::Texture textureCloud;
-    textureCloud.loadFromFile("../graphics/cloud.png");
 
     if (_id == eBigCloud)
         {setSpeed(sf::Vector2f(1, 0.0));

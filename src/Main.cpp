@@ -2,29 +2,16 @@
 #include <string>
 #include <sstream>
 #include "headers/GlobalEnums.h"
+#include "headers/preload.h"
 #include "headers/GameObject.h"
 #include "headers/Cloud.h"
 #include "headers/Branch.h"
 #include "headers/Player.h"
-#include "headers/preload.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 
-preload loadGame;//runs a preload
-preload* getData = &loadGame;
 
-Player* playerCharacter = getData->getPlayerPtr();
-GameObject* backgroundGO = getData->getGO(eGO::BACKGROUND);
-GameObject* beeGO = getData->getGO(eGO::BEE);
-GameObject* treeGO = getData->getGO(eGO::TREE);
-GameObject* logGO= getData->getGO(eGO::LOG);
-side eSideOfBranches[constants::numberOfBranches];
-Branch branchesGO[constants::numberOfBranches]; // initiate branchesGO
-GameObject* axeGO = getData->getGO(eGO::AXE);
 
-sf::Sound* pauseSound = &getData->getSFX(eSFX::PAUSE);
-sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
-sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
 
 bool paused = true;
 bool queuePause = false;
@@ -70,12 +57,12 @@ void moveLog(GameObject* _logGO, bool _logActive, sf::Time& _dt, side _playerSid
     }
 }
 
-void playerDeath()
+void playerDeath(Player* _playerCharacter, Branch* _branchesGO, side* _branchSide, sf::Sound* _deathSound, sf::Texture* _tombstoneTexture)
 {
-    if(playerCharacter->getPlayerSide() == branchesGO->getLethalBranch(branchesGO,eSideOfBranches,constants::numberOfBranches)){
-        if(playerCharacter->getPlayerSide()!= side::NONE){
-            playerCharacter->dead();
-            deathSound->play();
+    if(_playerCharacter->getPlayerSide() == _branchesGO->getLethalBranch(_branchesGO,_branchSide,constants::numberOfBranches)){
+        if(_playerCharacter->getPlayerSide()!= side::NONE){
+            _playerCharacter->dead(*_tombstoneTexture);
+            _deathSound->play();
             queuePause = true;                               
         }  
     }
@@ -84,19 +71,36 @@ void playerDeath()
 
 int main()
 {
+
+    preload loadGame;//runs a preload
+    preload* getData = &loadGame;
+
+    Player* playerCharacter = getData->getPlayerPtr();
+    GameObject* backgroundGO = getData->getGO(eGO::BACKGROUND);
+    GameObject* beeGO = getData->getGO(eGO::BEE);
+    GameObject* treeGO = getData->getGO(eGO::TREE);
+    GameObject* logGO = getData->getGO(eGO::LOG);
+    side eSideOfBranches[constants::numberOfBranches];
+    Branch branchesGO[constants::numberOfBranches]; // initiate branchesGO
+    GameObject* axeGO = getData->getGO(eGO::AXE);
+
+    sf::Sound* pauseSound = &getData->getSFX(eSFX::PAUSE);
+    sf::Sound* deathSound = &getData->getSFX(eSFX::DEATH);
+    sf::Sound* chopSound = &getData->getSFX(eSFX::CHOP);
+
     //variables 
     srand((int)time(0));
-    std::string fontFilePath = "../fonts/";
     
     int playerScore = 0;
     const float gameLoopTime = 12;
     float timeRemaining = gameLoopTime;
 
-    sf::VideoMode vm(constants::resolution.x, constants::resolution.y);
+    sf::VideoMode const vm(1280, 
+        720);
     sf::RenderWindow window(vm, "Timber",sf::Style::Resize);
     
     sf::Clock clockTime;
-    int cacheUpdate;
+    int cacheUpdate = 0;;
 
 
     //time bar
@@ -113,7 +117,7 @@ int main()
     sf::Text scoreText;
 
     sf::Font hudFont;
-    hudFont.loadFromFile(fontFilePath+"hudFont.ttf");
+    hudFont.loadFromFile("fonts\\hudFont.ttf");
     scoreText.setFont(hudFont);
     scoreText.setString("Score = 0");
     scoreText.setCharacterSize(20);
@@ -126,6 +130,8 @@ int main()
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);
 
+    treeGO->updatePos(constants::screenCenter.x, constants::screenCenter.y-80);
+
 
 //initiate all the gameobjects
     backgroundGO->getSprite().scale(float(constants::resolution.x)/1920,float(constants::resolution.y)/1080);//this is weak i should do this in the go class
@@ -135,6 +141,7 @@ int main()
     beeGO->setSpeed(sf::Vector2f(-40.0f, 2.0f));
     bool isBeeActive = false;
 
+    playerCharacter->alive(getData->getTexture(eTextureList::PLAYER));
     playerCharacter->sidePosition();
     side cachedPlayerSide = playerCharacter->getPlayerSide();//set the players starting side and cache it
 
@@ -206,7 +213,7 @@ int main()
                     paused=false;
                     branchesGO->updateBranchPosition(branchesGO,eSideOfBranches,constants::numberOfBranches, number);
                     playerScore =0;
-                    playerCharacter->alive();
+                    playerCharacter->alive(getData->getTexture(eTextureList::PLAYER));
                     numberOfUpdates = 0;
                     }
                 
@@ -238,7 +245,7 @@ int main()
                 case sf::Keyboard::Space:
                     if(!paused){
                         if (playerCharacter->getIsDead()== false && lockInput != true){
-                            playerDeath();
+                            playerDeath(playerCharacter,branchesGO,eSideOfBranches,deathSound, &getData->getTexture(eTextureList::Tombstone));
                             if (!queuePause){
                                 playerCharacter->swingAxe(true, *axeGO);
                                 cacheUpdate = numberOfUpdates;
@@ -275,7 +282,7 @@ int main()
          }
 
        if (!isBeeActive){
-            beeGO->updatePos(-100, 100+number*3);
+            beeGO->updatePos(-100, float(100+number*3));
             beeGO->setSpeed(sf::Vector2f(number*12%100*-1,0));
             isBeeActive=true;
        }
