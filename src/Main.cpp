@@ -116,16 +116,16 @@ int main()
     sf::Text messageText;
     sf::Text scoreText;
 
-    sf::Font hudFont;
-    hudFont.loadFromFile("fonts\\hudFont.ttf");
-    scoreText.setFont(hudFont);
+
+    sf::Font* hudFont = getData->getHudFont();
+    scoreText.setFont(*hudFont);
     scoreText.setString("Score = 0");
     scoreText.setCharacterSize(20);
     scoreText.setOutlineColor(sf::Color::Black);
     scoreText.setOutlineThickness(2);
     scoreText.setFillColor(sf::Color::White);
 
-    messageText.setFont(hudFont);
+    messageText.setFont(*hudFont);
     messageText.setString("TIMBER!!!: Press Enter To Start The Game!!");
     messageText.setCharacterSize(30);
     messageText.setFillColor(sf::Color::White);

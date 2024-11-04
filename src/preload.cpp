@@ -1,18 +1,19 @@
 #include "headers/preload.h"
 #include "headers/GlobalEnums.h"
+#include <string>
 
 
 
 preload::preload(){
-    textureCloud.loadFromFile("graphics\\cloud.png");
-    textureBranch.loadFromFile("graphics\\branch.png");
-    texturePlayer.loadFromFile("graphics\\player.png");
-    textureBee.loadFromFile("graphics\\bee.png");
-    textureTree.loadFromFile("graphics\\tree.png");
-    textureBackground.loadFromFile("graphics\\background.png");
-    textureAxe.loadFromFile("graphics\\axe.png");
-    textureLog.loadFromFile("graphics\\log.png");
-    textureTombstone.loadFromFile("graphics\\rip.png");
+    textureCloud.loadFromFile(gPath+"cloud.png");
+    textureBranch.loadFromFile(gPath+"branch.png");
+    texturePlayer.loadFromFile(gPath+"player.png");
+    textureBee.loadFromFile(gPath+"bee.png");
+    textureTree.loadFromFile(gPath+"tree.png");
+    textureBackground.loadFromFile(gPath+"background.png");
+    textureAxe.loadFromFile(gPath+"axe.png");
+    textureLog.loadFromFile(gPath+"log.png");
+    textureTombstone.loadFromFile(gPath+"rip.png");
 
 
     Player playerCharacter = Player(getTexture(eTextureList::PLAYER),0,0,true,0);
@@ -22,7 +23,9 @@ preload::preload(){
     tree = GameObject(getTexture(eTextureList::TREE), 1280/2,720/2-80, true);
     axe = GameObject(getTexture(eTextureList::AXE),0,0,true);
 
+    hudFont.loadFromFile("../fonts/hudFont.ttf");
 }
+
 
 sf::Texture& preload::getTexture(eTextureList _texture)
 {

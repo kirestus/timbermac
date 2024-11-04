@@ -8,6 +8,9 @@
 class preload{//Preload all the assets so they dont make the main loop super ugly
 private:
 
+std::string gPath = "../graphics/";
+std::string sfxPath = "../Sound/";
+
 sf::Texture textureCloud;
 sf::Texture textureBackground;
 sf::Texture textureBee;
@@ -28,6 +31,7 @@ sf::Sound pauseJingle;
 sf::SoundBuffer chopBuffer;
 sf::Sound chop;
 
+sf::Font hudFont;
 
 Player playerCharacter;
 GameObject backGround;
@@ -79,19 +83,19 @@ sf::Sound& getSFX(eSFX _sfx)
     switch(_sfx)
     {
         case eSFX::DEATH:
-            deathBuffer.loadFromFile("sound\\death.wav");
+            deathBuffer.loadFromFile(sfxPath+"death.wav");
             death.setBuffer(deathBuffer);
             return death;
             break;
 
         case eSFX::CHOP:
-            chopBuffer.loadFromFile("sound\\chop.wav");
+            chopBuffer.loadFromFile(sfxPath+"chop.wav");
             chop.setBuffer(chopBuffer);
             return chop;
             break;
 
         case eSFX::PAUSE:
-            pauseBuffer.loadFromFile("sound\\pause.mp3");
+            pauseBuffer.loadFromFile(sfxPath+"pause.mp3");
             pauseJingle.setBuffer(pauseBuffer);
             return pauseJingle;
             break;
@@ -101,5 +105,7 @@ sf::Sound& getSFX(eSFX _sfx)
     }
 return chop; // return a sound regardless
 }
+
+sf::Font* getHudFont(){return &hudFont;}
 
 };
